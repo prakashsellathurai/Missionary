@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { convertLatexToPdf, openLatexInOverleaf } from './utils/pdf-service';
 import './App.css';
 
 function App() {
@@ -16,23 +17,7 @@ function App() {
     setError(null);
 
     try {
-      // Use texlive.net API
-      const formData = new FormData();
-      formData.append('filecontents[]', latex);
-      formData.append('filename[]', 'document.tex');
-      formData.append('engine', 'pdflatex');
-      formData.append('return', 'pdf');
-
-      const response = await fetch('https://texlive.net/cgi-bin/latexcgi', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!response.ok) {
-        throw new Error('Conversion failed. Please checks your syntax.');
-      }
-
-      const blob = await response.blob();
+      const blob = await convertLatexToPdf(latex);
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = downloadUrl;
@@ -55,26 +40,7 @@ function App() {
     }
 
     try {
-      // Base64 encode the LaTeX content
-      // We need to handle UTF-8 characters correctly
-      const base64Latex = btoa(unescape(encodeURIComponent(latex)));
-      const dataUrl = `data:application/x-tex;base64,${base64Latex}`;
-
-      // Create a form to post data to Overleaf
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = 'https://www.overleaf.com/docs';
-      form.target = '_blank';
-
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'snip_uri';
-      input.value = dataUrl;
-
-      form.appendChild(input);
-      document.body.appendChild(form);
-      form.submit();
-      document.body.removeChild(form);
+      openLatexInOverleaf(latex);
     } catch (err) {
       console.error('Overleaf error:', err);
       setError('Failed to open in Overleaf');

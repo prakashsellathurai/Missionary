@@ -1,3 +1,4 @@
+import { convertLatexToPdf, openLatexInOverleaf } from './utils/pdf-service';
 
 // Logic to handle LaTeX to PDF conversion
 const convertToPdf = async (latexCode: string, button: HTMLButtonElement) => {
@@ -6,22 +7,7 @@ const convertToPdf = async (latexCode: string, button: HTMLButtonElement) => {
     button.disabled = true;
 
     try {
-        const formData = new FormData();
-        formData.append('filecontents[]', latexCode);
-        formData.append('filename[]', 'document.tex');
-        formData.append('engine', 'pdflatex');
-        formData.append('return', 'pdf');
-
-        const response = await fetch('https://texlive.net/cgi-bin/latexcgi', {
-            method: 'POST',
-            body: formData
-        });
-
-        if (!response.ok) {
-            throw new Error('Conversion failed.');
-        }
-
-        const blob = await response.blob();
+        const blob = await convertLatexToPdf(latexCode);
         const downloadUrl = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = downloadUrl;
@@ -75,23 +61,7 @@ const createConvertButton = (codeBlock: HTMLElement) => {
 
 const openInOverleaf = (latexCode: string) => {
     try {
-        const base64Latex = btoa(unescape(encodeURIComponent(latexCode)));
-        const dataUrl = `data:application/x-tex;base64,${base64Latex}`;
-
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = 'https://www.overleaf.com/docs';
-        form.target = '_blank';
-
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'snip_uri';
-        input.value = dataUrl;
-
-        form.appendChild(input);
-        document.body.appendChild(form);
-        form.submit();
-        document.body.removeChild(form);
+        openLatexInOverleaf(latexCode);
     } catch (err) {
         console.error('Missionary Extension: Overleaf Error', err);
     }
