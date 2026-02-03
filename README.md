@@ -1,6 +1,6 @@
 # Missionary
 
-build with [clanker](https://en.wikipedia.org/wiki/Clanker)
+built with [clanker](https://en.wikipedia.org/wiki/Clanker)
 
 Missionary is a web chrome extension that allows users to convert LaTeX code to PDF instantly. It also provides an option to open the LaTeX code in Overleaf for further editing. In chatgpt  web ui it will create a button to convert the LaTeX code to PDF instantly.
 
