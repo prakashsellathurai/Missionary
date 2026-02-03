@@ -16,15 +16,20 @@ function App() {
     setError(null);
 
     try {
-      // Use latexonline.cc API
-      // Note: GET request has length limits. For now this is MVP.
-      const encodedLatex = encodeURIComponent(latex);
-      const url = `https://latexonline.cc/compile?text=${encodedLatex}&force=true`;
+      // Use texlive.net API
+      const formData = new FormData();
+      formData.append('filecontents[]', latex);
+      formData.append('filename[]', 'document.tex');
+      formData.append('engine', 'pdflatex');
+      formData.append('return', 'pdf');
 
-      const response = await fetch(url);
+      const response = await fetch('https://texlive.net/cgi-bin/latexcgi', {
+        method: 'POST',
+        body: formData
+      });
 
       if (!response.ok) {
-        throw new Error('Conversion failed. Please checks your syntax or try shorter content.');
+        throw new Error('Conversion failed. Please checks your syntax.');
       }
 
       const blob = await response.blob();

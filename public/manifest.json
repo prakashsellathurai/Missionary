@@ -11,7 +11,7 @@
         "downloads"
     ],
     "host_permissions": [
-        "*://latexonline.cc/*"
+        "https://texlive.net/*"
     ],
     "content_scripts": [
         {

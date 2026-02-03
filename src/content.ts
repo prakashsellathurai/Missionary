@@ -6,10 +6,16 @@ const convertToPdf = async (latexCode: string, button: HTMLButtonElement) => {
     button.disabled = true;
 
     try {
-        const encodedLatex = encodeURIComponent(latexCode);
-        const url = `https://latexonline.cc/compile?text=${encodedLatex}&force=true`;
+        const formData = new FormData();
+        formData.append('filecontents[]', latexCode);
+        formData.append('filename[]', 'document.tex');
+        formData.append('engine', 'pdflatex');
+        formData.append('return', 'pdf');
 
-        const response = await fetch(url);
+        const response = await fetch('https://texlive.net/cgi-bin/latexcgi', {
+            method: 'POST',
+            body: formData
+        });
 
         if (!response.ok) {
             throw new Error('Conversion failed.');
