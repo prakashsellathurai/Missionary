@@ -4,7 +4,7 @@ import { convertLatexToPdf, openLatexInOverleaf } from './pdf-service';
 describe('pdf-service', () => {
     describe('convertLatexToPdf', () => {
         beforeEach(() => {
-            global.fetch = vi.fn();
+            globalThis.fetch = vi.fn();
         });
 
         afterEach(() => {
@@ -17,11 +17,11 @@ describe('pdf-service', () => {
                 ok: true,
                 blob: async () => mockBlob,
             };
-            (global.fetch as any).mockResolvedValue(mockResponse);
+            (globalThis.fetch as any).mockResolvedValue(mockResponse);
 
             const result = await convertLatexToPdf('latex code');
 
-            expect(global.fetch).toHaveBeenCalledWith('https://texlive.net/cgi-bin/latexcgi', expect.any(Object));
+            expect(globalThis.fetch).toHaveBeenCalledWith('https://texlive.net/cgi-bin/latexcgi', expect.any(Object));
             expect(result).toBe(mockBlob);
         });
 
@@ -29,7 +29,7 @@ describe('pdf-service', () => {
             const mockResponse = {
                 ok: false,
             };
-            (global.fetch as any).mockResolvedValue(mockResponse);
+            (globalThis.fetch as any).mockResolvedValue(mockResponse);
 
             await expect(convertLatexToPdf('latex code')).rejects.toThrow('Conversion failed.');
         });

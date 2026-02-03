@@ -1,4 +1,4 @@
-import { convertLatexToPdf, openLatexInOverleaf } from './utils/pdf-service';
+import { openLatexInOverleaf } from './utils/pdf-service';
 
 // Logic to handle LaTeX to PDF conversion
 const convertToPdf = async (latexCode: string, button: HTMLButtonElement) => {
@@ -7,16 +7,19 @@ const convertToPdf = async (latexCode: string, button: HTMLButtonElement) => {
     button.disabled = true;
 
     try {
-        const blob = await convertLatexToPdf(latexCode);
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = 'document.pdf';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(downloadUrl);
-        button.innerText = 'Downloaded!';
+        const response = await chrome.runtime.sendMessage({ type: 'CONVERT_TO_PDF', latexCode });
+
+        if (response.success && response.dataUrl) {
+            const a = document.createElement('a');
+            a.href = response.dataUrl;
+            a.download = 'document.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            button.innerText = 'Downloaded!';
+        } else {
+            throw new Error(response.error || 'Conversion failed');
+        }
     } catch (err) {
         console.error('Missionary Extension Error:', err);
         button.innerText = 'Error';
@@ -99,22 +102,36 @@ const createOverleafButton = (codeBlock: HTMLElement) => {
 
 const processCodeBlocks = () => {
     const codeBlocks = document.querySelectorAll('pre code');
+    console.log(`Missionary: Processing ${codeBlocks.length} code blocks`);
+
     codeBlocks.forEach((codeElement) => {
         // Cast to HTMLElement to access className and dataset
         const el = codeElement as HTMLElement;
-        const preElement = el.parentElement;
+        const preElement = el.closest('pre'); // Use closest to find parent pre robustly
 
-        if (!preElement || preElement.dataset.missionaryProcessed) {
+        if (!preElement) {
+            console.log('Missionary: Code block has no pre parent', el);
             return;
         }
+
+        if (preElement.dataset.missionaryProcessed) {
+            return;
+        }
+
+        const content = el.innerText || ''; // Use innerText to emulate rendered text
+        console.log('Missionary: Checking content', content.substring(0, 50));
 
         // Check for common LaTeX classes or content indicators
         const isLatex = el.classList.contains('language-latex') ||
             el.classList.contains('language-tex') ||
-            el.textContent?.includes('\\documentclass') ||
-            el.textContent?.includes('\\begin{document}');
+            content.includes('\\documentclass') ||
+            content.includes('\\begin{document}') ||
+            content.includes('\\begin{equation}') ||
+            content.includes('\\begin{align}') ||
+            content.includes('\\usepackage');
 
         if (isLatex) {
+            console.log('Missionary: Found LaTeX block', el);
             const pdfButton = createConvertButton(el);
             const overleafButton = createOverleafButton(el);
 

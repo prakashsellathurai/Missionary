@@ -6,6 +6,10 @@
     "action": {
         "default_popup": "index.html"
     },
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
     "permissions": [
         "activeTab",
         "downloads"
@@ -16,7 +20,8 @@
     "content_scripts": [
         {
             "matches": [
-                "https://chatgpt.com/*"
+                "https://chatgpt.com/*",
+                "https://*.chatgpt.com/*"
             ],
             "js": [
                 "content.js"
