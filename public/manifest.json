@@ -4,7 +4,13 @@
     "version": "1.0.0",
     "description": "Convert LaTeX to PDF directly in Chrome.",
     "action": {
-        "default_popup": "index.html"
+        "default_popup": "index.html",
+        "default_icon": "logo.png"
+    },
+    "icons": {
+        "16": "logo.png",
+        "48": "logo.png",
+        "128": "logo.png"
     },
     "background": {
         "service_worker": "background.js",
